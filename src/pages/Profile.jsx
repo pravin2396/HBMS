@@ -45,8 +45,8 @@ const Profile = () => {
     : 'Active Member';
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-slate-950 text-slate-100 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="w-full min-h-full bg-slate-950 text-slate-100 p-4 sm:p-5 lg:p-6">
+      <div className="w-full space-y-6">
 
         {/* Breadcrumb & Navigation */}
         <div className="flex items-center justify-between">
@@ -56,9 +56,6 @@ const Profile = () => {
           >
             <ArrowLeft className="w-4 h-4" /> Back to Dashboard
           </Link>
-          <span className="text-xs text-slate-500 font-mono">
-            ID: {user?.id}
-          </span>
         </div>
 
         {/* Profile Header Card */}
@@ -100,9 +97,6 @@ const Profile = () => {
             <h2 className="font-serif-luxury text-xl font-bold text-white">
               Edit Account Information
             </h2>
-            <p className="text-xs text-slate-400 mt-1">
-              Changes will update your active session and persist into LocalStorage.
-            </p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
@@ -151,9 +145,6 @@ const Profile = () => {
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-950/40 border border-slate-800/80 rounded-xl text-slate-400 text-sm cursor-not-allowed opacity-75"
                   />
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1 block">
-                  Email address is linked to your primary account authentication key.
-                </span>
               </div>
 
               {/* Phone */}

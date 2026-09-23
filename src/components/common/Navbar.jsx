@@ -1,17 +1,13 @@
 import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
-import { Hotel, LogOut, User, LayoutDashboard, ShieldCheck } from 'lucide-react';
+import { useSidebar } from '../../context/useSidebar';
+import { Hotel, Search, Bell, Menu } from 'lucide-react';
 
 const Navbar = () => {
-  const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  const { toggleSidebar } = useSidebar();
   const location = useLocation();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   // Hide Navbar completely on all authentication screens
   const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
@@ -20,90 +16,83 @@ const Navbar = () => {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-white shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+    <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-white shadow-lg">
+      <div className="px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 sm:h-20 gap-4">
           
-          {/* Logo & Hotel Brand */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-400 flex items-center justify-center shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform duration-200">
-              <Hotel className="w-7 h-7 text-slate-950 stroke-[2.2]" />
-            </div>
-            <div>
-              <span className="font-serif-luxury text-2xl font-bold tracking-wider text-amber-400 block leading-tight">
+          {/* Left Brand & Mobile Toggle */}
+          <div className="flex items-center gap-3">
+            {isAuthenticated && (
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-white border border-slate-700 transition-colors cursor-pointer lg:hidden"
+                title="Toggle Menu"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+            )}
+
+            <Link to="/dashboard" className="flex items-center gap-2.5 group">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-400 flex items-center justify-center text-slate-950 shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform">
+                <Hotel className="w-5 h-5 stroke-[2.2]" />
+              </div>
+              <span className="font-serif-luxury text-xl font-bold tracking-wider text-amber-400 block">
                 Paradise
               </span>
-              <span className="text-[10px] tracking-[0.25em] text-slate-400 font-semibold uppercase block">
-                Hotel & Resort
+            </Link>
+          </div>
+
+          {/* Center Search Bar */}
+          <div className="hidden md:flex items-center relative max-w-md w-full mx-auto">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+              <Search className="w-4 h-4" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search guests, suites, bookings..."
+              className="w-full pl-9 pr-9 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all"
+            />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <span className="text-[10px] bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-slate-400 font-mono font-medium">
+                /
               </span>
             </div>
-          </Link>
+          </div>
 
-          {/* Navigation Items */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          {/* Right Notification & User Capsule */}
+          <div className="flex items-center gap-3">
             {isAuthenticated ? (
               <>
-                <Link
-                  to="/dashboard"
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
-                    location.pathname === '/dashboard'
-                      ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                  }`}
+                {/* Notification Bell */}
+                <button
+                  type="button"
+                  className="p-2 rounded-xl bg-slate-800/80 text-amber-400 border border-slate-700 hover:bg-slate-700 transition-colors cursor-pointer relative shadow-sm"
+                  title="Notifications"
                 >
-                  <LayoutDashboard className="w-4 h-4" />
-                  <span className="hidden sm:inline">Dashboard</span>
-                </Link>
+                  <Bell className="w-4 h-4" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-400 ring-2 ring-slate-900"></span>
+                </button>
 
-                <Link
-                  to="/profile"
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
-                    location.pathname === '/profile'
-                      ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                  }`}
-                >
-                  <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">Profile</span>
-                </Link>
-
-                {/* User Info Capsule */}
-                <div className="hidden md:flex items-center gap-3 pl-3 border-l border-slate-800">
+                {/* User Capsule Pill */}
+                <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-slate-800 bg-slate-950/80 shadow-md">
                   <img
                     src={user?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || 'User'}`}
                     alt={user?.name}
-                    className="w-9 h-9 rounded-full object-cover ring-2 ring-amber-500/50"
+                    className="w-7 h-7 rounded-full object-cover ring-1 ring-amber-500/50 shrink-0"
                   />
-                  <div className="text-left">
-                    <p className="text-xs font-semibold text-slate-200 leading-tight">
-                      {user?.name}
-                    </p>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-400">
-                      <ShieldCheck className="w-3 h-3" />
-                      {user?.role || 'User'}
-                    </span>
-                  </div>
+                  <span className="text-xs font-semibold text-slate-200 hidden sm:inline whitespace-nowrap">
+                    {user?.name || 'Alexander Sterling'}
+                  </span>
                 </div>
-
-                {/* Logout Button */}
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-red-400 hover:text-white hover:bg-red-500/20 border border-red-500/20 transition-all cursor-pointer"
-                  title="Logout"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline">Logout</span>
-                </button>
               </>
             ) : ['/login', '/register', '/forgot-password'].includes(location.pathname) ? null : (
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Link
-                  to="/login"
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
-                >
-                  Sign In
-                </Link>
-              </div>
+              <Link
+                to="/login"
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/20"
+              >
+                Sign In
+              </Link>
             )}
           </div>
 

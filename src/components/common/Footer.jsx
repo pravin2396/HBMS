@@ -1,9 +1,14 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { Hotel, Shield, Award } from 'lucide-react';
 
 const Footer = () => {
+  const location = useLocation();
+  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
+  if (isAuthPage) return null;
+
   return (
-    <footer className="bg-slate-950 text-slate-400 border-t border-slate-800/80 py-8 px-4 sm:px-6 lg:px-8 mt-auto">
+    <footer className="bg-slate-950 text-slate-400 border-t border-slate-800 py-6 px-4 sm:px-6 lg:px-8 mt-auto">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
         
         {/* Brand Copyright */}
