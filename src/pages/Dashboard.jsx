@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/useAuth';
 import { useAnalytics } from '../context/useAnalytics';
 import { useRooms } from '../context/useRooms';
+import { useGuests } from '../context/useGuests';
 
 import MetricCard from '../components/dashboard/MetricCard';
 import RevenueSummary from '../components/dashboard/RevenueSummary';
@@ -40,6 +41,12 @@ const Dashboard = () => {
     refreshAnalytics
   } = useAnalytics();
   const { rooms } = useRooms();
+  const { guests } = useGuests();
+
+  // On mount, silently sync latest bookings and analytics in the background
+  useEffect(() => {
+    refreshAnalytics({ silent: true });
+  }, []);
 
   // Helper for quick express check-in button on the first pending reservation
   const handleQuickCheckInFirstPending = () => {
@@ -61,10 +68,22 @@ const Dashboard = () => {
   const occupiedRooms = rooms && rooms.length > 0
     ? rooms.filter((r) => r.status === 'Occupied').length
     : (analytics?.occupiedRooms ?? 86);
-  const totalGuests = analytics?.totalGuests ?? 214;
+
+  // Derive real-time guest metrics directly from guests inventory so changes in Module 4 reflect immediately
+  const initialGuestsCount = 12;
+  const baseTotalGuests = 214;
+  const totalGuests = guests && guests.length > 0
+    ? Math.max(0, baseTotalGuests + (guests.length - initialGuestsCount))
+    : (analytics?.totalGuests ?? 214);
+
   const todayCheckIns = analytics?.todayCheckIns ?? 18;
   const todayCheckOuts = analytics?.todayCheckOuts ?? 12;
-  const totalBookings = analytics?.totalBookings ?? 438;
+
+  // Derive real-time bookings count so additions/removals reflect immediately
+  const initialBookingsCount = 6;
+  const baseTotalBookings = 438;
+  const liveBookingsCount = bookings && bookings.length > 0 ? bookings.length : initialBookingsCount;
+  const totalBookings = Math.max(0, baseTotalBookings + (liveBookingsCount - initialBookingsCount));
 
   const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
 

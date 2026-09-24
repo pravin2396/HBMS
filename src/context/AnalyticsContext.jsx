@@ -57,8 +57,21 @@ export const AnalyticsProvider = ({ children }) => {
 
     loadRemoteAnalytics();
 
+    // Listen for cross-module updates (e.g. Guest Management or Room Management changes)
+    const handleDataSync = () => {
+      if (isMounted) {
+        setAnalytics(getStoredAnalytics());
+        setBookings(getStoredBookings());
+      }
+    };
+
+    window.addEventListener('storage', handleDataSync);
+    window.addEventListener('hbms_data_updated', handleDataSync);
+
     return () => {
       isMounted = false;
+      window.removeEventListener('storage', handleDataSync);
+      window.removeEventListener('hbms_data_updated', handleDataSync);
     };
   }, []);
 
@@ -108,8 +121,9 @@ export const AnalyticsProvider = ({ children }) => {
   /**
    * Refresh all analytics via HTTP GET
    */
-  const refreshAnalytics = async () => {
-    setIsLoading(true);
+  const refreshAnalytics = async (options = {}) => {
+    const silent = options && options.silent === true;
+    if (!silent) setIsLoading(true);
     try {
       const [remoteAnalytics, remoteBookings] = await Promise.all([
         fetchAnalyticsApi(),
@@ -117,11 +131,15 @@ export const AnalyticsProvider = ({ children }) => {
       ]);
       setAnalytics(remoteAnalytics);
       setBookings(remoteBookings);
-      toast.info('Dashboard analytics refreshed with latest data.');
+      if (!silent) {
+        toast.info('Dashboard analytics refreshed with latest data.');
+      }
     } catch {
-      toast.error('Failed to refresh analytics.');
+      if (!silent) {
+        toast.error('Failed to refresh analytics.');
+      }
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   };
 

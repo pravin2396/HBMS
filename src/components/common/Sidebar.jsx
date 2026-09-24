@@ -9,6 +9,7 @@ import {
   LogOut,
   Hotel,
   BedDouble,
+  Users,
   X
 } from 'lucide-react';
 
@@ -32,6 +33,7 @@ const Sidebar = () => {
 
   const isDashboard = location.pathname === '/dashboard';
   const isRooms = location.pathname.startsWith('/rooms');
+  const isGuests = location.pathname.startsWith('/guests');
 
   return (
     <>
@@ -114,6 +116,20 @@ const Sidebar = () => {
             >
               <BedDouble className={`w-4 h-4 shrink-0 ${isRooms ? 'text-slate-950' : 'text-amber-400'}`} />
               <span>Rooms & Suites</span>
+            </Link>
+
+            {/* Guest Management Button */}
+            <Link
+              to="/guests"
+              onClick={closeSidebar}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                isGuests
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
+              }`}
+            >
+              <Users className={`w-4 h-4 shrink-0 ${isGuests ? 'text-slate-950' : 'text-amber-400'}`} />
+              <span>Guest Directory</span>
             </Link>
           </div>
 

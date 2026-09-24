@@ -344,6 +344,46 @@ function backendApiPlugin() {
         }
       }
 
+      // ==========================================
+      // MODULE 4: GUEST MANAGEMENT API
+      // ==========================================
+      if (url.startsWith('/api/guests')) {
+        if (method === 'GET') {
+          res.statusCode = 200;
+          return res.end(JSON.stringify({
+            success: true,
+            message: 'Guests fetched successfully',
+            timestamp: new Date().toISOString()
+          }));
+        }
+
+        if (method === 'POST') {
+          res.statusCode = 201;
+          return res.end(JSON.stringify({
+            success: true,
+            message: 'Guest profile created successfully',
+            guest: body
+          }));
+        }
+
+        if (method === 'PUT') {
+          res.statusCode = 200;
+          return res.end(JSON.stringify({
+            success: true,
+            message: 'Guest profile updated successfully',
+            guest: body
+          }));
+        }
+
+        if (method === 'DELETE') {
+          res.statusCode = 200;
+          return res.end(JSON.stringify({
+            success: true,
+            message: 'Guest profile deleted successfully'
+          }));
+        }
+      }
+
       // Fallback 404
       res.statusCode = 404;
       return res.end(JSON.stringify({

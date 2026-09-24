@@ -9,6 +9,8 @@ import Dashboard from '../pages/Dashboard';
 import Profile from '../pages/Profile';
 import Rooms from '../pages/Rooms';
 import RoomDetails from '../pages/RoomDetails';
+import Guests from '../pages/Guests';
+import GuestProfile from '../pages/GuestProfile';
 import NotFound from '../pages/NotFound';
 
 import ProtectedRoute from '../components/auth/ProtectedRoute';
@@ -83,6 +85,22 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <RoomDetails />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/guests"
+        element={
+          <ProtectedRoute>
+            <Guests />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/guests/:id"
+        element={
+          <ProtectedRoute>
+            <GuestProfile />
           </ProtectedRoute>
         }
       />

@@ -198,6 +198,34 @@ export const getStoredAnalytics = () => {
       console.warn('Error syncing rooms to analytics:', e);
     }
 
+    // Dynamically synchronize guest counts from live guest inventory
+    try {
+      const storedGuestsRaw = localStorage.getItem('hbms_guests');
+      if (storedGuestsRaw) {
+        const storedGuests = JSON.parse(storedGuestsRaw);
+        if (Array.isArray(storedGuests)) {
+          const initialGuestsCount = 12;
+          const baseTotalGuests = 214;
+          parsed.totalGuests = Math.max(0, baseTotalGuests + (storedGuests.length - initialGuestsCount));
+        }
+      }
+    } catch (e) {
+      console.warn('Error syncing guests to analytics:', e);
+    }
+
+    // Dynamically synchronize bookings count from live bookings
+    try {
+      const storedBookingsRaw = localStorage.getItem('hbms_bookings');
+      if (storedBookingsRaw) {
+        const storedBookings = JSON.parse(storedBookingsRaw);
+        if (Array.isArray(storedBookings)) {
+          parsed.totalBookings = Math.max(432 + storedBookings.length, storedBookings.length);
+        }
+      }
+    } catch (e) {
+      console.warn('Error syncing bookings count to analytics:', e);
+    }
+
     return parsed;
   } catch (error) {
     console.error('Error reading analytics storage:', error);
