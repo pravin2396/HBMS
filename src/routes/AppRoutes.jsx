@@ -11,6 +11,7 @@ import Rooms from '../pages/Rooms';
 import RoomDetails from '../pages/RoomDetails';
 import Guests from '../pages/Guests';
 import GuestProfile from '../pages/GuestProfile';
+import Bookings from '../pages/Bookings';
 import NotFound from '../pages/NotFound';
 
 import ProtectedRoute from '../components/auth/ProtectedRoute';
@@ -101,6 +102,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <GuestProfile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/bookings"
+        element={
+          <ProtectedRoute>
+            <Bookings />
           </ProtectedRoute>
         }
       />

@@ -302,6 +302,38 @@ function backendApiPlugin() {
             message: 'Guest checked in successfully'
           }));
         }
+
+        if (method === 'PUT' && url.includes('/checkout')) {
+          res.statusCode = 200;
+          return res.end(JSON.stringify({
+            success: true,
+            message: 'Guest checked out successfully'
+          }));
+        }
+
+        if (method === 'PUT' && url.includes('/status')) {
+          res.statusCode = 200;
+          return res.end(JSON.stringify({
+            success: true,
+            message: 'Booking status updated successfully'
+          }));
+        }
+
+        if (method === 'PUT' && url.includes('/cancel')) {
+          res.statusCode = 200;
+          return res.end(JSON.stringify({
+            success: true,
+            message: 'Booking cancelled successfully'
+          }));
+        }
+
+        if (method === 'DELETE') {
+          res.statusCode = 200;
+          return res.end(JSON.stringify({
+            success: true,
+            message: 'Booking deleted successfully'
+          }));
+        }
       }
 
       // ==========================================

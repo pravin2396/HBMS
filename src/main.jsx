@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthContext';
 import { AnalyticsProvider } from './context/AnalyticsContext';
 import { RoomProvider } from './context/RoomContext';
 import { GuestProvider } from './context/GuestContext';
+import { BookingProvider } from './context/BookingContext';
 import { SidebarProvider } from './context/SidebarContext';
 
 createRoot(document.getElementById('root')).render(
@@ -15,9 +16,11 @@ createRoot(document.getElementById('root')).render(
       <AnalyticsProvider>
         <RoomProvider>
           <GuestProvider>
-            <SidebarProvider>
-              <App />
-            </SidebarProvider>
+            <BookingProvider>
+              <SidebarProvider>
+                <App />
+              </SidebarProvider>
+            </BookingProvider>
           </GuestProvider>
         </RoomProvider>
       </AnalyticsProvider>
