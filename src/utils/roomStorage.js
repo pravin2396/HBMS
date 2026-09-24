@@ -278,26 +278,19 @@ export const buildInitialRooms = () => {
 
 export const INITIAL_ROOMS = buildInitialRooms();
 
+export const ROOMS_INITIALIZED_KEY = 'hbms_rooms_initialized_v2';
+
 /**
- * Initialize rooms in LocalStorage if not present or migrate to full inventory
+ * Initialize rooms in LocalStorage once, ensuring deleted rooms remain permanently deleted
  */
 export const initializeRoomStorage = () => {
   try {
+    const isInitialized = localStorage.getItem(ROOMS_INITIALIZED_KEY);
     const existing = localStorage.getItem(ROOMS_STORAGE_KEY);
-    if (!existing) {
+
+    if (!isInitialized || !existing) {
       localStorage.setItem(ROOMS_STORAGE_KEY, JSON.stringify(INITIAL_ROOMS));
-    } else {
-      const parsed = JSON.parse(existing);
-      // If legacy 12 rooms, upgrade to full 120-room hotel inventory while preserving user-added custom rooms
-      if (Array.isArray(parsed) && parsed.length < 20) {
-        const fullRooms = buildInitialRooms();
-        // Keep any rooms that user added with custom room numbers
-        const userAdded = parsed.filter(
-          (p) => !fullRooms.some((f) => String(f.roomNumber) === String(p.roomNumber))
-        );
-        const merged = [...userAdded, ...fullRooms];
-        localStorage.setItem(ROOMS_STORAGE_KEY, JSON.stringify(merged));
-      }
+      localStorage.setItem(ROOMS_INITIALIZED_KEY, 'true');
     }
   } catch (error) {
     console.error('Failed to initialize room storage:', error);
