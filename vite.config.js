@@ -304,6 +304,46 @@ function backendApiPlugin() {
         }
       }
 
+      // ==========================================
+      // MODULE 3: ROOM MANAGEMENT API
+      // ==========================================
+      if (url.startsWith('/api/rooms')) {
+        if (method === 'GET') {
+          res.statusCode = 200;
+          return res.end(JSON.stringify({
+            success: true,
+            message: 'Rooms fetched successfully',
+            timestamp: new Date().toISOString()
+          }));
+        }
+
+        if (method === 'POST') {
+          res.statusCode = 201;
+          return res.end(JSON.stringify({
+            success: true,
+            message: 'Room created successfully',
+            room: body
+          }));
+        }
+
+        if (method === 'PUT') {
+          res.statusCode = 200;
+          return res.end(JSON.stringify({
+            success: true,
+            message: 'Room updated successfully',
+            room: body
+          }));
+        }
+
+        if (method === 'DELETE') {
+          res.statusCode = 200;
+          return res.end(JSON.stringify({
+            success: true,
+            message: 'Room deleted successfully'
+          }));
+        }
+      }
+
       // Fallback 404
       res.statusCode = 404;
       return res.end(JSON.stringify({

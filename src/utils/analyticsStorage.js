@@ -183,6 +183,21 @@ export const getStoredAnalytics = () => {
         parsed.revenue.monthlyTrends = INITIAL_ANALYTICS.revenue.monthlyTrends;
       }
     }
+    // Dynamically synchronize room counts from live room inventory
+    try {
+      const storedRoomsRaw = localStorage.getItem('hbms_rooms');
+      if (storedRoomsRaw) {
+        const storedRooms = JSON.parse(storedRoomsRaw);
+        if (Array.isArray(storedRooms) && storedRooms.length > 0) {
+          parsed.totalRooms = storedRooms.length;
+          parsed.availableRooms = storedRooms.filter((r) => r.status === 'Available').length;
+          parsed.occupiedRooms = storedRooms.filter((r) => r.status === 'Occupied').length;
+        }
+      }
+    } catch (e) {
+      console.warn('Error syncing rooms to analytics:', e);
+    }
+
     return parsed;
   } catch (error) {
     console.error('Error reading analytics storage:', error);
@@ -264,6 +279,25 @@ export const addNewBooking = (bookingData) => {
   analytics.revenue.grossRevenue += newBooking.amount;
 
   saveStoredAnalytics(analytics);
+
+  // Also synchronize hbms_rooms if a room is assigned
+  try {
+    const storedRoomsRaw = localStorage.getItem('hbms_rooms');
+    if (storedRoomsRaw) {
+      const storedRooms = JSON.parse(storedRoomsRaw);
+      const targetRoom = storedRooms.find(
+        (r) => String(r.roomNumber) === String(newBooking.roomNumber) && r.status === 'Available'
+      ) || storedRooms.find((r) => r.status === 'Available');
+
+      if (targetRoom) {
+        targetRoom.status = 'Occupied';
+        localStorage.setItem('hbms_rooms', JSON.stringify(storedRooms));
+      }
+    }
+  } catch (e) {
+    console.warn('Sync booking to rooms error:', e);
+  }
+
   return { newBooking, updatedAnalytics: analytics };
 };
 

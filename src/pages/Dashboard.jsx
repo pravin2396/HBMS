@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/useAuth';
 import { useAnalytics } from '../context/useAnalytics';
+import { useRooms } from '../context/useRooms';
 
 import MetricCard from '../components/dashboard/MetricCard';
 import RevenueSummary from '../components/dashboard/RevenueSummary';
@@ -38,6 +39,7 @@ const Dashboard = () => {
     checkInGuest,
     refreshAnalytics
   } = useAnalytics();
+  const { rooms } = useRooms();
 
   // Helper for quick express check-in button on the first pending reservation
   const handleQuickCheckInFirstPending = () => {
@@ -51,9 +53,14 @@ const Dashboard = () => {
     }
   };
 
-  const totalRooms = analytics?.totalRooms ?? 120;
-  const availableRooms = analytics?.availableRooms ?? 34;
-  const occupiedRooms = analytics?.occupiedRooms ?? 86;
+  // Derive real-time room metrics directly from rooms inventory so changes in Module 3 reflect immediately
+  const totalRooms = rooms && rooms.length > 0 ? rooms.length : (analytics?.totalRooms ?? 120);
+  const availableRooms = rooms && rooms.length > 0
+    ? rooms.filter((r) => r.status === 'Available').length
+    : (analytics?.availableRooms ?? 34);
+  const occupiedRooms = rooms && rooms.length > 0
+    ? rooms.filter((r) => r.status === 'Occupied').length
+    : (analytics?.occupiedRooms ?? 86);
   const totalGuests = analytics?.totalGuests ?? 214;
   const todayCheckIns = analytics?.todayCheckIns ?? 18;
   const todayCheckOuts = analytics?.todayCheckOuts ?? 12;

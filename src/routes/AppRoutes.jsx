@@ -7,6 +7,8 @@ import Register from '../pages/Register';
 import ForgotPassword from '../pages/ForgotPassword';
 import Dashboard from '../pages/Dashboard';
 import Profile from '../pages/Profile';
+import Rooms from '../pages/Rooms';
+import RoomDetails from '../pages/RoomDetails';
 import NotFound from '../pages/NotFound';
 
 import ProtectedRoute from '../components/auth/ProtectedRoute';
@@ -65,6 +67,22 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rooms"
+        element={
+          <ProtectedRoute>
+            <Rooms />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rooms/:id"
+        element={
+          <ProtectedRoute>
+            <RoomDetails />
           </ProtectedRoute>
         }
       />
