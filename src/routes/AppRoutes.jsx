@@ -13,6 +13,7 @@ import Guests from '../pages/Guests';
 import GuestProfile from '../pages/GuestProfile';
 import Bookings from '../pages/Bookings';
 import CheckInOut from '../pages/CheckInOut';
+import Payments from '../pages/Payments';
 import NotFound from '../pages/NotFound';
 
 import ProtectedRoute from '../components/auth/ProtectedRoute';
@@ -119,6 +120,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <CheckInOut />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/payments"
+        element={
+          <ProtectedRoute>
+            <Payments />
           </ProtectedRoute>
         }
       />
