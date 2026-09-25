@@ -15,6 +15,7 @@ import {
   calculateBookingPricing,
   getAvailableRoomsForDates
 } from '../utils/bookingStorage';
+import { checkInGuestApi, checkOutGuestApi } from '../api/checkInOutApi';
 
 export const BookingProvider = ({ children }) => {
   const [bookings, setBookings] = useState(() => {
@@ -222,12 +223,32 @@ export const BookingProvider = ({ children }) => {
 
   // Check In
   const checkIn = async (id) => {
-    return updateStatus(id, 'Checked-In');
+    setIsLoading(true);
+    try {
+      const res = await checkInGuestApi(id);
+      setBookings(getStoredBookings());
+      toast.success(`Guest checked in! Suite ${res.booking?.roomNumber || ''} is now Occupied.`);
+      return { success: true, booking: res.booking };
+    } catch (err) {
+      return updateStatus(id, 'Checked-In');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Check Out
   const checkOut = async (id) => {
-    return updateStatus(id, 'Checked-Out');
+    setIsLoading(true);
+    try {
+      const res = await checkOutGuestApi(id);
+      setBookings(getStoredBookings());
+      toast.success(`Check-out completed! Suite ${res.booking?.roomNumber || ''} is now Available.`);
+      return { success: true, booking: res.booking };
+    } catch (err) {
+      return updateStatus(id, 'Checked-Out');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Cancel Booking

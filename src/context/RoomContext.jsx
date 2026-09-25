@@ -50,9 +50,20 @@ export const RoomProvider = ({ children }) => {
     }
   }, []);
 
-  // Initial fetch on mount
+  // Initial fetch on mount & sync on storage/cross-module events
   useEffect(() => {
     loadRooms(true);
+
+    const handleSync = () => {
+      loadRooms(true);
+    };
+
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('hbms_data_updated', handleSync);
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('hbms_data_updated', handleSync);
+    };
   }, [loadRooms]);
 
   // Compute Filtered and Sorted Rooms

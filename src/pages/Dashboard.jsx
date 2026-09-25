@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/useAuth';
 import { useAnalytics } from '../context/useAnalytics';
 import { useRooms } from '../context/useRooms';
 import { useGuests } from '../context/useGuests';
+import { getStoredRooms } from '../utils/roomStorage';
+import { getStoredBookings } from '../utils/bookingStorage';
 
 import MetricCard from '../components/dashboard/MetricCard';
 import RevenueSummary from '../components/dashboard/RevenueSummary';
@@ -42,11 +44,24 @@ const Dashboard = () => {
   } = useAnalytics();
   const { rooms } = useRooms();
   const { guests } = useGuests();
+  const [dataVersion, setDataVersion] = useState(0);
 
-  // On mount, silently sync latest bookings and analytics in the background
+  // On mount, silently sync latest bookings and analytics in the background & listen for cross-module updates
   useEffect(() => {
     refreshAnalytics({ silent: true });
-  }, []);
+
+    const handleDataSync = () => {
+      refreshAnalytics({ silent: true });
+      setDataVersion((v) => v + 1);
+    };
+
+    window.addEventListener('storage', handleDataSync);
+    window.addEventListener('hbms_data_updated', handleDataSync);
+    return () => {
+      window.removeEventListener('storage', handleDataSync);
+      window.removeEventListener('hbms_data_updated', handleDataSync);
+    };
+  }, [refreshAnalytics]);
 
   // Helper for quick express check-in button on the first pending reservation
   const handleQuickCheckInFirstPending = () => {
@@ -60,30 +75,54 @@ const Dashboard = () => {
     }
   };
 
-  // Derive real-time room metrics directly from rooms inventory so changes in Module 3 reflect immediately
-  const totalRooms = rooms && rooms.length > 0 ? rooms.length : (analytics?.totalRooms ?? 120);
-  const availableRooms = rooms && rooms.length > 0
-    ? rooms.filter((r) => r.status === 'Available').length
+  // Derive real-time room metrics directly from rooms inventory so changes in Check-In / Out reflect immediately
+  const storedRooms = getStoredRooms();
+  const activeRoomsList = storedRooms && storedRooms.length > 0 ? storedRooms : (rooms || []);
+  const totalRooms = activeRoomsList && activeRoomsList.length > 0 ? activeRoomsList.length : (analytics?.totalRooms ?? 120);
+  const availableRooms = activeRoomsList && activeRoomsList.length > 0
+    ? activeRoomsList.filter((r) => r && String(r.status).toLowerCase() === 'available').length
     : (analytics?.availableRooms ?? 34);
-  const occupiedRooms = rooms && rooms.length > 0
-    ? rooms.filter((r) => r.status === 'Occupied').length
+  const occupiedRooms = activeRoomsList && activeRoomsList.length > 0
+    ? activeRoomsList.filter((r) => r && String(r.status).toLowerCase() === 'occupied').length
     : (analytics?.occupiedRooms ?? 86);
 
-  // Derive real-time guest metrics directly from guests inventory so changes in Module 4 reflect immediately
-  const initialGuestsCount = 12;
-  const baseTotalGuests = 214;
-  const totalGuests = guests && guests.length > 0
-    ? Math.max(0, baseTotalGuests + (guests.length - initialGuestsCount))
-    : (analytics?.totalGuests ?? 214);
-
-  const todayCheckIns = analytics?.todayCheckIns ?? 18;
-  const todayCheckOuts = analytics?.todayCheckOuts ?? 12;
-
-  // Derive real-time bookings count so additions/removals reflect immediately
+  // Derive real-time bookings count & live list so additions/removals/status changes reflect immediately
+  const storedBookings = getStoredBookings();
+  const liveBookings = storedBookings && storedBookings.length > 0 ? storedBookings : (bookings || []);
   const initialBookingsCount = 6;
   const baseTotalBookings = 438;
-  const liveBookingsCount = bookings && bookings.length > 0 ? bookings.length : initialBookingsCount;
-  const totalBookings = Math.max(0, baseTotalBookings + (liveBookingsCount - initialBookingsCount));
+  const totalBookings = Math.max(0, baseTotalBookings + (liveBookings.length - initialBookingsCount));
+
+  // Live pending arrivals ready for check-in
+  const pendingArrivals = liveBookings.filter(
+    (b) => b.status !== 'Checked-In' && b.status !== 'Checked-Out' && b.status !== 'Cancelled'
+  );
+  // Live in-house guests currently checked in
+  const inHouseGuests = liveBookings.filter((b) => b.status === 'Checked-In');
+
+  let checkOutHistoryList = [];
+  try {
+    const rawOut = localStorage.getItem('hbms_checkout_history');
+    if (rawOut) checkOutHistoryList = JSON.parse(rawOut);
+  } catch (e) {
+    checkOutHistoryList = [];
+  }
+
+  // Live in-house guest count & total guest count
+  const baseTotalGuests = 214;
+  const initialGuestsCount = 12;
+  const guestsDiff = (guests && guests.length > 0) ? (guests.length - initialGuestsCount) : 0;
+  const inHouseDiff = inHouseGuests.length - 6;
+  const totalGuests = Math.max(0, baseTotalGuests + guestsDiff + inHouseDiff);
+
+  // Today's Check-Ins: Live expected arrivals waiting to check-in (decrements as arrivals check in)
+  const baseTodayCheckIns = 18;
+  const todayCheckIns = Math.max(0, baseTodayCheckIns - inHouseDiff);
+
+  // Today's Check-Outs: Live completed departures (increments as guests check out)
+  const baseTodayCheckOuts = 12;
+  const completedCheckOutsDelta = checkOutHistoryList.length > 2 ? (checkOutHistoryList.length - 2) : 0;
+  const todayCheckOuts = baseTodayCheckOuts + completedCheckOutsDelta;
 
   const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
 
@@ -194,7 +233,7 @@ const Dashboard = () => {
               value={totalGuests}
               subtext="In-house luxury patrons"
               icon={Users}
-              trend="+18 today"
+              trend={`${inHouseGuests.length} active in-house`}
               trendPositive={true}
               accent="from-blue-500 to-indigo-600"
             />
@@ -205,7 +244,7 @@ const Dashboard = () => {
               value={todayCheckIns}
               subtext="Expected arrivals today"
               icon={LogIn}
-              trend="6 pending keys"
+              trend={`${pendingArrivals.length} ready for check-in`}
               trendPositive={true}
               accent="from-cyan-500 to-teal-600"
             />
@@ -216,7 +255,7 @@ const Dashboard = () => {
               value={todayCheckOuts}
               subtext="Scheduled departures"
               icon={LogOut}
-              trend="8 completed"
+              trend={`${checkOutHistoryList.length} completed departures`}
               trendPositive={true}
               accent="from-purple-500 to-pink-600"
             />
@@ -258,7 +297,7 @@ const Dashboard = () => {
 
         {/* Recent Bookings Component */}
         <RecentBookingsTable
-          bookings={bookings}
+          bookings={liveBookings}
           onCheckInGuest={checkInGuest}
         />
       </div>

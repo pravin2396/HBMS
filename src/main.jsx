@@ -8,6 +8,7 @@ import { AnalyticsProvider } from './context/AnalyticsContext';
 import { RoomProvider } from './context/RoomContext';
 import { GuestProvider } from './context/GuestContext';
 import { BookingProvider } from './context/BookingContext';
+import { CheckInOutProvider } from './context/CheckInOutContext';
 import { SidebarProvider } from './context/SidebarContext';
 
 createRoot(document.getElementById('root')).render(
@@ -17,9 +18,11 @@ createRoot(document.getElementById('root')).render(
         <RoomProvider>
           <GuestProvider>
             <BookingProvider>
-              <SidebarProvider>
-                <App />
-              </SidebarProvider>
+              <CheckInOutProvider>
+                <SidebarProvider>
+                  <App />
+                </SidebarProvider>
+              </CheckInOutProvider>
             </BookingProvider>
           </GuestProvider>
         </RoomProvider>

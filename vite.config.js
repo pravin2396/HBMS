@@ -337,6 +337,49 @@ function backendApiPlugin() {
       }
 
       // ==========================================
+      // MODULE 6: CHECK-IN / CHECK-OUT API
+      // ==========================================
+      if (url.startsWith('/api/checkin-history')) {
+        res.statusCode = 200;
+        return res.end(JSON.stringify({
+          success: true,
+          message: 'Check-in history fetched successfully'
+        }));
+      }
+
+      if (url.startsWith('/api/checkout-history')) {
+        res.statusCode = 200;
+        return res.end(JSON.stringify({
+          success: true,
+          message: 'Check-out history fetched successfully'
+        }));
+      }
+
+      if (url === '/api/checkin') {
+        res.statusCode = 200;
+        return res.end(JSON.stringify({
+          success: true,
+          message: 'Check-in processed successfully'
+        }));
+      }
+
+      if (url === '/api/checkin-walkin') {
+        res.statusCode = 200;
+        return res.end(JSON.stringify({
+          success: true,
+          message: 'Walk-in check-in processed successfully'
+        }));
+      }
+
+      if (url === '/api/checkout') {
+        res.statusCode = 200;
+        return res.end(JSON.stringify({
+          success: true,
+          message: 'Check-out processed successfully'
+        }));
+      }
+
+      // ==========================================
       // MODULE 3: ROOM MANAGEMENT API
       // ==========================================
       if (url.startsWith('/api/rooms')) {

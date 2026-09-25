@@ -330,22 +330,103 @@ export const addNewBooking = (bookingData) => {
 };
 
 /**
- * Quick check-in a booking
+ * Quick check-in a booking with full cross-module sync (rooms, bookings, guests, history, analytics)
  */
 export const checkInGuestStorage = (bookingId) => {
   const bookings = getStoredBookings();
   const analytics = getStoredAnalytics();
 
-  const index = bookings.findIndex((b) => b.id === bookingId);
+  const index = bookings.findIndex((b) => String(b.id) === String(bookingId));
   if (index !== -1) {
-    bookings[index].status = 'Checked-In';
+    const booking = bookings[index];
+    const checkInTimestamp = new Date().toISOString();
+    booking.status = 'Checked-In';
+    booking.actualCheckInTime = checkInTimestamp;
+    booking.keyCardId = booking.keyCardId || `RFID-${booking.roomNumber}-A`;
+    bookings[index] = booking;
     saveStoredBookings(bookings);
 
+    // 1. Update room status to 'Occupied' in hbms_rooms
+    try {
+      const storedRoomsRaw = localStorage.getItem('hbms_rooms');
+      if (storedRoomsRaw) {
+        const storedRooms = JSON.parse(storedRoomsRaw);
+        const room = storedRooms.find((r) => String(r.roomNumber) === String(booking.roomNumber));
+        if (room) {
+          room.status = 'Occupied';
+          room.assignedGuest = booking.guestName;
+          localStorage.setItem('hbms_rooms', JSON.stringify(storedRooms));
+        }
+      }
+    } catch (e) {
+      console.warn('Room status update error on check-in:', e);
+    }
+
+    // 2. Update guest directory stayStatus
+    try {
+      const storedGuestsRaw = localStorage.getItem('hbms_guests');
+      if (storedGuestsRaw) {
+        const storedGuests = JSON.parse(storedGuestsRaw);
+        const guest = storedGuests.find(
+          (g) => (booking.guestId && String(g.id) === String(booking.guestId)) ||
+                 (booking.guestEmail && g.email?.toLowerCase() === booking.guestEmail.toLowerCase()) ||
+                 g.name?.toLowerCase() === booking.guestName.toLowerCase()
+        );
+        if (guest) {
+          guest.stayStatus = 'Checked-In';
+          guest.roomAssigned = `Suite ${booking.roomNumber} (${booking.suiteType})`;
+          localStorage.setItem('hbms_guests', JSON.stringify(storedGuests));
+        }
+      }
+    } catch (e) {
+      console.warn('Guest directory update error on check-in:', e);
+    }
+
+    // 3. Log to Check-In History
+    try {
+      const historyRaw = localStorage.getItem('hbms_checkin_history');
+      const history = historyRaw ? JSON.parse(historyRaw) : [];
+      const historyRecord = {
+        id: `CHK-IN-${Date.now().toString().slice(-4)}`,
+        bookingId: booking.id,
+        guestName: booking.guestName,
+        guestEmail: booking.guestEmail,
+        guestPhone: booking.guestPhone || '+1 (555) 000-0000',
+        avatar: booking.avatar,
+        roomNumber: booking.roomNumber,
+        suiteType: booking.suiteType,
+        vipStatus: booking.vipStatus || 'Standard Guest',
+        checkInTime: checkInTimestamp,
+        expectedCheckOut: booking.checkOut,
+        stayDuration: booking.stayDuration || `${booking.nights || 1} Nights`,
+        scheduledNights: booking.nights || 1,
+        keyCardId: booking.keyCardId,
+        depositAmount: 500,
+        depositMethod: 'Credit Card Pre-Authorization',
+        receptionAgent: 'Alexander Sterling (Front Desk Mgr)',
+        notes: 'Checked in via Dashboard express check-in.'
+      };
+      history.unshift(historyRecord);
+      localStorage.setItem('hbms_checkin_history', JSON.stringify(history));
+    } catch (e) {
+      console.warn('Check-in history log error:', e);
+    }
+
+    // 4. Update Analytics
+    if (analytics.availableRooms > 0) {
+      analytics.availableRooms -= 1;
+      analytics.occupiedRooms += 1;
+    }
     if (analytics.todayCheckIns > 0) {
       analytics.todayCheckIns -= 1;
     }
     saveStoredAnalytics(analytics);
-    return bookings[index];
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('hbms_data_updated'));
+    }
+
+    return booking;
   }
   return null;
 };
