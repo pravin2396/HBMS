@@ -14,6 +14,7 @@ import GuestProfile from '../pages/GuestProfile';
 import Bookings from '../pages/Bookings';
 import CheckInOut from '../pages/CheckInOut';
 import Payments from '../pages/Payments';
+import BookingHistory from '../pages/BookingHistory';
 import NotFound from '../pages/NotFound';
 
 import ProtectedRoute from '../components/auth/ProtectedRoute';
@@ -128,6 +129,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Payments />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/booking-history"
+        element={
+          <ProtectedRoute>
+            <BookingHistory />
           </ProtectedRoute>
         }
       />

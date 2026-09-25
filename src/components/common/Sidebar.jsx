@@ -13,6 +13,7 @@ import {
   CalendarCheck,
   ArrowLeftRight,
   CreditCard,
+  History,
   X
 } from 'lucide-react';
 
@@ -40,6 +41,7 @@ const Sidebar = () => {
   const isBookings = location.pathname.startsWith('/bookings');
   const isCheckInOut = location.pathname.startsWith('/check-in-out');
   const isPayments = location.pathname.startsWith('/payments');
+  const isBookingHistory = location.pathname.startsWith('/booking-history');
 
   return (
     <>
@@ -178,6 +180,20 @@ const Sidebar = () => {
             >
               <CreditCard className={`w-4 h-4 shrink-0 ${isPayments ? 'text-slate-950' : 'text-amber-400'}`} />
               <span>Payments & Invoices</span>
+            </Link>
+
+            {/* Booking History Button (Module 8) */}
+            <Link
+              to="/booking-history"
+              onClick={closeSidebar}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                isBookingHistory
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
+              }`}
+            >
+              <History className={`w-4 h-4 shrink-0 ${isBookingHistory ? 'text-slate-950' : 'text-amber-400'}`} />
+              <span>Booking History</span>
             </Link>
           </div>
 

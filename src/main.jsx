@@ -10,6 +10,7 @@ import { GuestProvider } from './context/GuestContext';
 import { BookingProvider } from './context/BookingContext';
 import { CheckInOutProvider } from './context/CheckInOutContext';
 import { PaymentProvider } from './context/PaymentContext';
+import { BookingHistoryProvider } from './context/BookingHistoryContext';
 import { SidebarProvider } from './context/SidebarContext';
 
 createRoot(document.getElementById('root')).render(
@@ -21,9 +22,11 @@ createRoot(document.getElementById('root')).render(
             <BookingProvider>
               <CheckInOutProvider>
                 <PaymentProvider>
-                  <SidebarProvider>
-                    <App />
-                  </SidebarProvider>
+                  <BookingHistoryProvider>
+                    <SidebarProvider>
+                      <App />
+                    </SidebarProvider>
+                  </BookingHistoryProvider>
                 </PaymentProvider>
               </CheckInOutProvider>
             </BookingProvider>
