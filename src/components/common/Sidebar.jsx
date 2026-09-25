@@ -14,6 +14,7 @@ import {
   ArrowLeftRight,
   CreditCard,
   History,
+  BarChart3,
   X
 } from 'lucide-react';
 
@@ -42,6 +43,7 @@ const Sidebar = () => {
   const isCheckInOut = location.pathname.startsWith('/check-in-out');
   const isPayments = location.pathname.startsWith('/payments');
   const isBookingHistory = location.pathname.startsWith('/booking-history');
+  const isReports = location.pathname.startsWith('/reports');
 
   return (
     <>
@@ -194,6 +196,20 @@ const Sidebar = () => {
             >
               <History className={`w-4 h-4 shrink-0 ${isBookingHistory ? 'text-slate-950' : 'text-amber-400'}`} />
               <span>Booking History</span>
+            </Link>
+
+            {/* Reports & Analytics Button (Module 9) */}
+            <Link
+              to="/reports"
+              onClick={closeSidebar}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                isReports
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
+              }`}
+            >
+              <BarChart3 className={`w-4 h-4 shrink-0 ${isReports ? 'text-slate-950' : 'text-amber-400'}`} />
+              <span>Reports & Analytics</span>
             </Link>
           </div>
 

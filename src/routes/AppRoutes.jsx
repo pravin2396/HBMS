@@ -15,6 +15,7 @@ import Bookings from '../pages/Bookings';
 import CheckInOut from '../pages/CheckInOut';
 import Payments from '../pages/Payments';
 import BookingHistory from '../pages/BookingHistory';
+import Reports from '../pages/Reports';
 import NotFound from '../pages/NotFound';
 
 import ProtectedRoute from '../components/auth/ProtectedRoute';
@@ -137,6 +138,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <BookingHistory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoute>
+            <Reports />
           </ProtectedRoute>
         }
       />
